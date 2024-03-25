@@ -4,22 +4,27 @@
 #include <iconv.h>
 #include <string.h>
 #endif
-#define BUF_SIZE 256
-#define _STR(x) #x
-#define STR(x) _STR(x)
+#define STR_MAX 512
+#define PROGNAME "hzk16ascii"
+#include "common.h"
 
-int main()
+int main(int argc, char *argv[])
 {
 	FILE *fp;
-	unsigned char buf[BUF_SIZE] = {0};
+	unsigned char text[STR_MAX] = {0};
 	int nhanzi = 0, nother = 0;
+
+	parse_args(argc, argv, (char*)text, STR_MAX, NULL, NULL, 0);
 
 	if ((fp = fopen("HZK16", "rb")) == NULL) {
 		perror("HZK16");
 		return 1;
 	}
-	printf("输入一行汉字: ");
-	scanf("%" STR(BUF_SIZE) "s", (char*)buf);
+	if (text[0] == '\0') {
+		// read from stdin
+		printf("输入一行汉字: ");
+		scanf("%" STR(STR_MAX) "s", (char*)text);
+	}
 #ifdef unix
 	{
 		iconv_t cd;
@@ -37,16 +42,16 @@ int main()
 		strncpy((char*)buf, (char*)gbk, BUF_SIZE);
 	}
 #endif
-	for (int i = 0; buf[i]; i++) {
+	for (int i = 0; text[i]; i++) {
 		// GB2312 encoding range 0xA1A1~0XFEFE
-		if (buf[i] < 0xA1 || buf[i] > 0xFE || buf[i + 1] < 0xA1 || buf[i + 1] > 0xFE) {
+		if (text[i] < 0xA1 || text[i] > 0xFE || text[i + 1] < 0xA1 || text[i + 1] > 0xFE) {
 			nother++;
 			// GBK character that does not exist in GB2312
-			if (buf[i] >= 0x81 && buf[i] <= 0xFE && buf[i + 1] >= 0x40 && buf[i + 1] <= 0xFE)
+			if (text[i] >= 0x81 && text[i] <= 0xFE && text[i + 1] >= 0x40 && text[i + 1] <= 0xFE)
 				i++;
 			continue;
 		}
-		fseek(fp, (94 * (buf[i] - 0xA1) + (buf[i + 1] - 0xA1)) * 32, SEEK_SET);
+		fseek(fp, (94 * (text[i] - 0xA1) + (text[i + 1] - 0xA1)) * 32, SEEK_SET);
 		for (int j = 0; j < 32; j++) {
 			int halfrow = fgetc(fp);
 			for (int b = 0x80; b; b >>= 1)
