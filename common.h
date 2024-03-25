@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #define _STR(x) #x
 #define STR(x) _STR(x)
@@ -17,7 +18,7 @@
 #endif
 #define BMP_FILENAME "banner.bmp"
 
-static inline print_usage(const char* progname, int enable_font_size, int enable_outfile)
+static inline void print_usage(const char* progname, int enable_font_size, int enable_outfile)
 {
 	printf("Usage: %s [text]", progname);
 	if (enable_font_size)
