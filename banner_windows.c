@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	FT_Error		error;
 	char			text[STR_MAX];
 	wchar_t*		wtext;
-	char*			membitmap;
+	unsigned char*	membitmap;
 	int				font_size;
 	int				nwchar;
 	int				pitch;
@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
 	// write to bmp
 	for (int x = 0; x < max_height; x++) {
 		for (int y = 0; y < total_width; y++) {
-			if (membitmap[x * total_width + y])
-				bmp_pixel_init(&img.img_pixels[x + 10][y + 10], 0, 0, 0); // black color text
+			int gradient = 255 - membitmap[x * total_width + y];
+			bmp_pixel_init(&img.img_pixels[x + 10][y + 10], gradient, gradient, gradient); // text in grayscale
 		}
 	}
 	bmp_img_write(&img, outfile);
